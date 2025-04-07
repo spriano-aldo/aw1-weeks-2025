@@ -3,6 +3,7 @@ import { Form, Button, Alert } from "react-bootstrap";
 import dayjs from "dayjs";
 
 function AnswerForm(props) {
+  
   const initialState = {
     text: "",
     email: "",
@@ -10,6 +11,7 @@ function AnswerForm(props) {
   };
   
   const handleSubmit = async (prevState, formData) => {
+    // creo un oggetto {} dal FormData
     const answer = Object.fromEntries(formData.entries());
 
     // esempio di validazione
