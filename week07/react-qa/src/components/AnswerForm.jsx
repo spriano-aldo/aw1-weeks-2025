@@ -5,9 +5,9 @@ import dayjs from "dayjs";
 function AnswerForm(props) {
   
   const initialState = {
-    text: "",
-    email: "",
-    date: dayjs().format("YYYY-MM-DD")
+    text: props.answer?.text,
+    email: props.answer?.email,
+    date: props.answer?.date ?? dayjs()
   };
   
   const handleSubmit = async (prevState, formData) => {
@@ -19,9 +19,12 @@ function AnswerForm(props) {
       answer.error = "The answer can't be empty, please fix it!";
       return answer;
     }
-
-    // aggiungo la risposta allo stato in App
-    props.addAnswer(answer);
+    
+    if(props.addAnswer)
+      // aggiungo la risposta allo stato in App
+      props.addAnswer(answer);
+    else
+      props.editAnswer({id: props.answer.id, ...answer});
 
     // ritorno lo stato del form
     return initialState;
@@ -43,9 +46,12 @@ function AnswerForm(props) {
         </Form.Group>
         <Form.Group className="mb-3">
           <Form.Label>Date</Form.Label>
-          <Form.Control name="date" type="date" required={true} min={dayjs().format("YYYY-MM-DD")}defaultValue={state.date}></Form.Control>
+          <Form.Control name="date" type="date" required={true} min={dayjs().format("YYYY-MM-DD")} defaultValue={state.date.format("YYYY-MM-DD")}></Form.Control>
         </Form.Group>
-        <Button variant="primary" type="submit">Add</Button> <Button variant="danger">Cancel</Button>
+        { props.addAnswer && <Button variant="primary" type="submit">Add</Button> }
+        { props.editAnswer && <Button variant="success" type="submit">Update</Button> }
+        {" "}
+        <Button variant="danger" onClick={props.cancel}>Cancel</Button>
       </Form>
     </>
   );

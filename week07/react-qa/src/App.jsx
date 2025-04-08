@@ -12,35 +12,46 @@ fakeQuestion.init();
 const fakeAnswers = fakeQuestion.getAnswers();
 
 function App() {
-    const [question, setQuestion] = useState(fakeQuestion);
-    const [answers, setAnswers] = useState(fakeAnswers);
+  const [question, setQuestion] = useState(fakeQuestion);
+  const [answers, setAnswers] = useState(fakeAnswers);
 
-    const voteUp = (answerId) => {
-      setAnswers(oldAnswers => {
-        return oldAnswers.map(ans => {
-          if(ans.id === answerId)
-            return new Answer(ans.id, ans.text, ans.email, ans.userId, ans.date, ans.score +1);
-          else
-            return ans;
-        });
+  const voteUp = (answerId) => {
+    setAnswers(oldAnswers => {
+      return oldAnswers.map(ans => {
+        if(ans.id === answerId)
+          return new Answer(ans.id, ans.text, ans.email, ans.userId, ans.date, ans.score +1);
+        else
+          return ans;
       });
-    }
+    });
+  }
 
-    const addAnswer = (answer) => {
-      setAnswers(oldAnswers => {
-        // temporaneo
-        const newId = Math.max(... oldAnswers.map(ans => ans.id)) + 1;
-        const newAnswer = new Answer(newId, answer.text, answer.email, undefined, answer.date);
-        return [...oldAnswers, newAnswer];
+  const addAnswer = (answer) => {
+    setAnswers(oldAnswers => {
+      // temporaneo
+      const newId = Math.max(... oldAnswers.map(ans => ans.id)) + 1;
+      const newAnswer = new Answer(newId, answer.text, answer.email, undefined, answer.date);
+      return [...oldAnswers, newAnswer];
+    });
+  }
+
+  const updateAnswer = (answer) => {
+    setAnswers(oldAnswers => {
+      return oldAnswers.map(ans => {
+        if(ans.id === answer.id)
+          return new Answer(answer.id, answer.text, answer.email, ans.userId, answer.date, ans.score);
+        else
+          return ans;
       });
-    }
+    });
+  }
 
   return (
     <>
       <NavHeader questionNum={question.id} />
       <Container fluid className="mt-3">
         <QuestionDescription question={question} />
-        <Answers answers={answers} voteUp={voteUp} addAnswer={addAnswer}/>
+        <Answers answers={answers} voteUp={voteUp} addAnswer={addAnswer} editAnswer={updateAnswer}/>
       </Container>
     </>
   )
