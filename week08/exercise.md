@@ -2,10 +2,6 @@
 
 _Goal: Manage routes in the "HeapOverrun" React app developed last week._
 
-## Implement Dark/Light Mode
-Using React's `Context` and the `data-bs-theme` attribute of Bootstrap 5.x, add a switch in the Navbar to implement a Dark/Light mode for the application.
-
-## Add Multi-page Navigation
 Starting from the app developed last week, incorporate React Router to enable navigation across multiple pages within the application.
 
 Create four distinct pages with their corresponding routes:
