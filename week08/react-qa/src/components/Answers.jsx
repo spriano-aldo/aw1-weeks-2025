@@ -4,13 +4,6 @@ import AnswerForm from "./AnswerForm";
 import { useState } from "react";
 
 function Answers (props) {
-  const [mode, setMode] = useState("view");
-  const [editableAnswer, setEditableAnswer] = useState();
-
-  const handleEdit = (answer) => {
-    setEditableAnswer(answer);
-    setMode("edit");
-  }
 
   return(
     <>
@@ -19,13 +12,9 @@ function Answers (props) {
     </Row>
     <Row>
       <Col lg={10} className="mx-auto">
-        <AnswerTable answers={props.answers} voteUp={props.voteUp} handleEdit={handleEdit} deleteAnswer={props.deleteAnswer} />
+        <AnswerTable answers={props.answers} voteUp={props.voteUp} deleteAnswer={props.deleteAnswer} />
 
-        { mode === "view" && <Button variant="primary" onClick={() => setMode("add")}>Add</Button>}
-
-        { mode === "add" && <AnswerForm addAnswer={(answer) => {props.addAnswer(answer); setMode("view");}} cancel={() => setMode("view")}/>}
-
-        { mode === "edit" && <AnswerForm key={editableAnswer.id} answer={editableAnswer} editAnswer={(answer) => {props.editAnswer(answer); setMode("view");}} cancel={() => setMode("view")} />}
+        <Link className="btn btn-primary" to="answers/new">Add</Link>
       </Col>
     </Row>
     </>
@@ -57,7 +46,7 @@ function AnswerTable (props) {
         </tr>
       </thead>
       <tbody>
-        { sortedAnswers.map((ans) => <AnswerRow key={ans.id} answer={ans} voteUp={props.voteUp} handleEdit={props.handleEdit} deleteAnswer={props.deleteAnswer} />) }
+        { sortedAnswers.map((ans) => <AnswerRow key={ans.id} answer={ans} voteUp={props.voteUp} deleteAnswer={props.deleteAnswer} />) }
       </tbody>
     </Table>
   );

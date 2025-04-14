@@ -6,13 +6,14 @@ import { Question, Answer } from "./models/QAModels.mjs";
 import NavHeader from "./components/NavHeader";
 import QuestionDescription from "./components/QuestionDescription";
 import Answers from "./components/Answers";
+import { Routes, Route } from "react-router";
 
 const fakeQuestion = new Question(1, "Is JavaScript better than Python?", "luigi.derussis@polito.it", 1, "2025-02-28");
 fakeQuestion.init();
 const fakeAnswers = fakeQuestion.getAnswers();
 
 function App() {
-  const [question, setQuestion] = useState(fakeQuestion);
+  const [questions, setQuestions] = useState([fakeQuestion]);
   const [answers, setAnswers] = useState(fakeAnswers);
 
   const voteUp = (answerId) => {
@@ -52,12 +53,34 @@ function App() {
     });
   }
 
+  {/* ROUTES
+    
+    - / => tutte le domande (index)
+    - /questions/:qid => domanda "id" con le sue risposte
+
+    OPZIONE 1:
+    - /questions/:qid/answers/new => nuova risposta
+    - /questions/:qid/answers/:aid/edit => modifica risposta
+
+    OPZIONE 2:
+    - /answers/:aid/edit => modifica risposta
+
+    - * => pagina not found
+
+    */}
+
   return (
     <>
-      <NavHeader questionNum={question.id} />
+      <NavHeader />
       <Container fluid className="mt-3">
-        <QuestionDescription question={question} />
-        <Answers answers={answers} voteUp={voteUp} addAnswer={addAnswer} editAnswer={updateAnswer} deleteAnswer={deleteAnswer} />
+        <Routes>
+          <Route path="/questions/:questionId" element={<QuestionDescription questions={questions} />} >
+            <Route index element={<Answers answers={answers} voteUp={voteUp} addAnswer={addAnswer} editAnswer={updateAnswer} deleteAnswer={deleteAnswer} />} />
+            
+          
+          </Route>
+        </Routes>
+        <AnswerForm addAnswer={(answer) => {props.addAnswer(answer); setMode("view");}} cancel={() => setMode("view")}/>
       </Container>
     </>
   )

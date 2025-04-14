@@ -4,7 +4,7 @@ function NavHeader (props) {
   return(
     <Navbar bg='primary' data-bs-theme='dark'>
       <Container fluid>
-        <Navbar.Brand>HeapOverrun - Question {props.questionNum}</Navbar.Brand>
+        <Navbar.Brand>HeapOverrun</Navbar.Brand>
       </Container>
     </Navbar>
   );
