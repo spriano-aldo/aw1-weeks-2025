@@ -1,12 +1,13 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useState } from "react";
-import { Container } from "react-bootstrap";
 
 import { Question, Answer } from "./models/QAModels.mjs";
-import NavHeader from "./components/NavHeader";
 import QuestionDescription from "./components/QuestionDescription";
 import Answers from "./components/Answers";
+import { AnswerForm, EditAnswerForm } from "./components/AnswerForm";
 import { Routes, Route } from "react-router";
+import DefaultLayout from "./components/DefaultLayout";
+import Questions from "./components/Questions";
 
 const fakeQuestion = new Question(1, "Is JavaScript better than Python?", "luigi.derussis@polito.it", 1, "2025-02-28");
 fakeQuestion.init();
@@ -70,19 +71,17 @@ function App() {
     */}
 
   return (
-    <>
-      <NavHeader />
-      <Container fluid className="mt-3">
-        <Routes>
-          <Route path="/questions/:questionId" element={<QuestionDescription questions={questions} />} >
-            <Route index element={<Answers answers={answers} voteUp={voteUp} addAnswer={addAnswer} editAnswer={updateAnswer} deleteAnswer={deleteAnswer} />} />
-            
-          
-          </Route>
-        </Routes>
-        <AnswerForm addAnswer={(answer) => {props.addAnswer(answer); setMode("view");}} cancel={() => setMode("view")}/>
-      </Container>
-    </>
+    <Routes>
+      <Route element={<DefaultLayout />}>
+        <Route path="/" element={<Questions questions={questions}/>} />
+        <Route path="/questions/:questionId" element={<QuestionDescription questions={questions} />} >
+          <Route index element={<Answers answers={answers} voteUp={voteUp} addAnswer={addAnswer} editAnswer={updateAnswer} deleteAnswer={deleteAnswer} />} />
+          <Route path="answers/new" element={<AnswerForm addAnswer={addAnswer}/>}/>
+          <Route path="answers/:answerId/edit" element={<EditAnswerForm editAnswer={updateAnswer} answers={answers} />}/>
+        </Route>
+        <Route path="*" element={<p>Pagina non trovata</p>} />
+      </Route>
+    </Routes>
   )
 
 }

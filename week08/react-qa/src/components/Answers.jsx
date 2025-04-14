@@ -1,7 +1,7 @@
 import "bootstrap-icons/font/bootstrap-icons.css";
 import { Row, Col, Table, Button } from "react-bootstrap";
-import AnswerForm from "./AnswerForm";
 import { useState } from "react";
+import { Link } from "react-router";
 
 function Answers (props) {
 
@@ -72,8 +72,8 @@ function AnswerData(props) {
 function AnswerAction(props) {
   return(
     <td>
-      <Button variant="warning" onClick={() => props.voteUp(props.answer.id)}><i className="bi bi-arrow-up" /></Button>
-      <Button variant="primary" className="mx-1" onClick={() => props.handleEdit(props.answer)}><i className="bi bi-pencil-square" /></Button> 
+      <Button variant="warning" onClick={() => props.voteUp(props.answer.id)}><i className="bi bi-arrow-up" /></Button> 
+      <Link className="mx-1 btn btn-primary" to={`answers/${props.answer.id}/edit`} ><i className="bi bi-pencil-square" /></Link>
       <Button variant="danger"><i className="bi bi-trash" onClick={() => props.deleteAnswer(props.answer.id)} /></Button>
     </td>
   );
