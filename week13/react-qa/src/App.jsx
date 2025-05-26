@@ -1,18 +1,21 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useEffect, useState } from "react";
 
-import { Answer } from "./models/QAModels.mjs";
 import DefaultLayout from "./components/DefaultLayout";
 import QuestionDescription from "./components/QuestionDescription";
 import Answers from "./components/Answers";
 import Questions from "./components/Questions";
-import { Routes, Route } from "react-router";
+import { Routes, Route, Navigate } from "react-router";
 import { AnswerForm, EditAnswerForm } from "./components/AnswerForm";
+import { LoginForm } from "./components/AuthComponents";
 import NotFound from "./components/NotFound";
 import API from "./API/API.mjs";
 
 function App() {
   const [questions, setQuestions] = useState([]);
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [message, setMessage] = useState('');
+  const [user, setUser] = useState('');
 
   useEffect(() => {
     const getQuestions = async () => {
@@ -22,6 +25,32 @@ function App() {
     getQuestions();
   }, []);
 
+  useEffect(() => {
+    const checkAuth = async () => {
+      const user = await API.getUserInfo(); // we have the user info here
+      setLoggedIn(true);
+      setUser(user);
+    };
+    checkAuth();
+  }, []);
+
+  const handleLogin = async (credentials) => {
+    try {
+      const user = await API.logIn(credentials);
+      setLoggedIn(true);
+      setMessage({msg: `Welcome, ${user.name}!`, type: 'success'});
+      setUser(user);
+    }catch(err) {
+      setMessage({msg: err, type: 'danger'});
+    }
+  };
+
+  const handleLogout = async () => {
+    await API.logOut();
+    setLoggedIn(false);
+    // clean up everything
+    setMessage('');
+  };
 
   {/* ROUTES
     
@@ -41,13 +70,14 @@ function App() {
 
   return (
     <Routes>
-      <Route element={ <DefaultLayout /> } >
+      <Route element={ <DefaultLayout loggedIn={loggedIn} handleLogout={handleLogout} message={message} setMessage={setMessage} /> } >
         <Route path="/" element={ <Questions questions={questions}/> } />
         <Route path="/questions/:questionId" element={ <QuestionDescription questions={questions} /> } >
-          <Route index element={ <Answers /> } />
-          <Route path="answers/new" element={ <AnswerForm addAnswer={true} /> } />
-          <Route path="answers/:answerId/edit" element={ <EditAnswerForm editAnswer={true} /> } /> 
+          <Route index element={ <Answers user={user} /> } />
+          <Route path="answers/new" element={loggedIn ? <AnswerForm addAnswer={true} user={user} /> : <Navigate replace to='/' />} />
+          <Route path="answers/:answerId/edit" element={loggedIn ? <EditAnswerForm editAnswer={true} /> : <Navigate replace to='/' />} /> 
         </Route>
+        <Route path='/login' element={loggedIn ? <Navigate replace to='/' /> : <LoginForm handleLogin={handleLogin} />} />
         <Route path="*" element={ <NotFound /> } />
       </Route>
     </Routes>

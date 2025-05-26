@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Button, Container, Navbar } from 'react-bootstrap';
 import { Link } from "react-router";
+import { LogoutButton } from './AuthComponents';
 
-function NavHeader() {
+function NavHeader(props) {
   const [darkMode, setDarkMode] = useState(false);
 
   useEffect(() => {
@@ -21,6 +22,10 @@ function NavHeader() {
       <Button onClick={() => setDarkMode(oldMode => !oldMode)}>
         { darkMode ? <i className="bi bi-sun-fill" /> : <i className="bi bi-moon-fill" />}
       </Button>
+      {props.loggedIn ? 
+        <LogoutButton logout={props.handleLogout} /> :
+        <Link to='/login'className='btn btn-outline-light'>Login</Link>
+      }
       </Container>
     </Navbar>
   );

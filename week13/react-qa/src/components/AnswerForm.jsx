@@ -21,7 +21,7 @@ export function EditAnswerForm(props) {
   answer.date = dayjs(answer.date);
  
   if(answer)
-    return <AnswerForm answer={answer} editAnswer={props.editAnswer} />
+    return <AnswerForm answer={answer} editAnswer={props.editAnswer} user={props.user} />
   else {
     return (
       <Row>
@@ -39,7 +39,7 @@ export function AnswerForm(props) {
   
   const initialState = {
     text: props.answer?.text,
-    email: props.answer?.email,
+    email: props.answer?.email ?? props.user.username,
     date: props.answer?.date.format("YYYY-MM-DD") ?? dayjs().format("YYYY-MM-DD")
   };
   
@@ -63,7 +63,13 @@ export function AnswerForm(props) {
         return answer;
       }
     else
-      await API.updateAnswer({id: props.answer.id, ...answer, userId: props.answer.userId, score: props.answer.score});
+      try {
+        await API.updateAnswer({id: props.answer.id, ...answer, userId: props.answer.userId, score: props.answer.score});
+      }
+      catch(serverError) {
+        answer.error = serverError;
+        return answer;
+      }
 
     navigate(`/questions/${questionId}`);
   }
@@ -84,7 +90,7 @@ export function AnswerForm(props) {
         </Form.Group>
         <Form.Group className="mb-3">
           <Form.Label>email</Form.Label>
-          <Form.Control name="email" type="email" required={true} defaultValue={state.email}></Form.Control>
+          <Form.Control name="email" type="email" required={true} defaultValue={state.email} disabled></Form.Control>
         </Form.Group>
         <Form.Group className="mb-3">
           <Form.Label>Date</Form.Label>

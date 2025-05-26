@@ -2,8 +2,12 @@
 import express from 'express';
 import morgan from 'morgan';
 import {check, validationResult} from 'express-validator';
-import {listQuestions, getQuestion, listAnswersOf, addAnswer, updateAnswer, voteAnswer} from './dao.mjs';
+import {listQuestions, getQuestion, listAnswersOf, addAnswer, updateAnswer, voteAnswer, getUser} from './dao.mjs';
 import cors from 'cors';
+
+import passport from 'passport';
+import LocalStrategy from 'passport-local';
+import session from 'express-session';
 
 // init
 const app = express();
@@ -15,10 +19,41 @@ app.use(morgan('dev'));
 
 const corsOptions = {
   origin: 'http://localhost:5173',
-  optionsSuccessState: 200
+  optionsSuccessState: 200,
+  credentials: true
 };
 
 app.use(cors(corsOptions));
+
+passport.use(new LocalStrategy(async function verify(username, password, cb) {
+  const user = await getUser(username, password);
+  if(!user)
+    return cb(null, false, 'Incorrect username or password.');
+    
+  return cb(null, user);
+}));
+
+passport.serializeUser(function (user, cb) {
+  cb(null, user);
+});
+
+passport.deserializeUser(function (user, cb) {
+  return cb(null, user);
+});
+
+const isLoggedIn = (req, res, next) => {
+  if(req.isAuthenticated()) {
+    return next();
+  }
+  return res.status(401).json({error: 'Not authorized'});
+}
+
+app.use(session({
+  secret: "shhhhh... it's a secret!",
+  resave: false,
+  saveUninitialized: false,
+}));
+app.use(passport.authenticate('session'));
 
 /* ROUTES */
 
@@ -55,7 +90,7 @@ app.get('/api/questions/:id/answers', async (req, res) => {
 });
 
 // POST /api/questions/<id>/answers
-app.post('/api/questions/:id/answers', [
+app.post('/api/questions/:id/answers', isLoggedIn, [
   check('text').notEmpty(),
   check('email').isEmail(),
   check('score').isNumeric(),
@@ -69,6 +104,10 @@ app.post('/api/questions/:id/answers', [
   const newAnswer = req.body;
   const questionId = req.params.id;
 
+  if(newAnswer.email !== req.user.username){
+    return res.status(401).json({error: 'You can add answer only from your account'});
+  }
+
   try {
     const id = await addAnswer(newAnswer, questionId);
     res.status(201).location(id).end();
@@ -79,7 +118,7 @@ app.post('/api/questions/:id/answers', [
 });
 
 // PUT /api/answers/<id>
-app.put('/api/answers/:id', [
+app.put('/api/answers/:id', isLoggedIn, [
   check('text').notEmpty(),
   check('email').isEmail(),
   check('score').isNumeric(),
@@ -93,6 +132,10 @@ app.put('/api/answers/:id', [
   const answerToUpdate = req.body;
   answerToUpdate.id = req.params.id;
 
+  if(answerToUpdate.email !== req.user.username){
+    return res.status(401).json({error: 'You can\'t change the author of your question'});
+  }
+
   try {
     await updateAnswer(answerToUpdate);
     res.status(200).end();
@@ -102,7 +145,7 @@ app.put('/api/answers/:id', [
 });
 
 // POST /api/answers/<id>/vote
-app.post('/api/answers/:id/vote', [
+app.post('/api/answers/:id/vote', isLoggedIn, [
   check('vote').notEmpty()
 ], async (req, res) => {
   const errors = validationResult(req);
@@ -121,6 +164,26 @@ app.post('/api/answers/:id/vote', [
   } catch(e) {
     res.status(503).json({error: e.message});
   }
+});
+
+// POST /api/sessions
+app.post('/api/sessions', passport.authenticate('local'), function(req, res) {
+  return res.status(201).json(req.user);
+});
+
+// GET /api/sessions/current
+app.get('/api/sessions/current', (req, res) => {
+  if(req.isAuthenticated()) {
+    res.json(req.user);}
+  else
+    res.status(401).json({error: 'Not authenticated'});
+});
+
+// DELETE /api/session/current
+app.delete('/api/sessions/current', (req, res) => {
+  req.logout(() => {
+    res.end();
+  });
 });
 
 // far partire il server

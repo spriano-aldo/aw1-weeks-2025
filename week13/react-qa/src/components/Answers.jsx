@@ -5,7 +5,7 @@ import { Link, useParams } from "react-router";
 import API from "../API/API.mjs";
 import { Answer } from "../models/QAModels.mjs";
 
-function Answers () {
+function Answers (props) {
   const [answers, setAnswers] = useState([]);
 
   const { questionId } = useParams();
@@ -50,7 +50,7 @@ function Answers () {
     </Row>
     <Row>
       <Col lg={10} className="mx-auto">
-        <AnswerTable answers={answers} voteUp={voteUp} deleteAnswer={deleteAnswer} />
+        <AnswerTable answers={answers} voteUp={voteUp} deleteAnswer={deleteAnswer} user={props.user} />
         <Link className="btn btn-primary" to="answers/new">Add</Link>
       </Col>
     </Row>
@@ -83,7 +83,7 @@ function AnswerTable (props) {
         </tr>
       </thead>
       <tbody>
-        { sortedAnswers.map((ans) => <AnswerRow key={ans.id} answer={ans} voteUp={props.voteUp} deleteAnswer={props.deleteAnswer} />) }
+        { sortedAnswers.map((ans) => <AnswerRow key={ans.id} answer={ans} voteUp={props.voteUp} deleteAnswer={props.deleteAnswer} user={props.user} />) }
       </tbody>
     </Table>
   );
@@ -111,8 +111,10 @@ function AnswerAction(props) {
     <td>
       <Button variant="warning" onClick={() => props.voteUp(props.answer.id)} disabled={props.answer.voted}><i className="bi bi-arrow-up" /></Button>
       {/* senza params: <Link className="btn btn-primary mx-1" to={`answers/${props.answer.id}/edit`}><i className="bi bi-pencil-square" /></Link> */}
-      <Link className="btn btn-primary mx-1" to={`answers/${props.answer.id}/edit`} state={props.answer.serialize()} ><i className="bi bi-pencil-square" /></Link> 
-      <Button variant="danger" onClick={() => props.deleteAnswer(props.answer.id)}><i className="bi bi-trash" /></Button>
+      {props.user.username === props.answer.email && <>
+        <Link className="btn btn-primary mx-1" to={`answers/${props.answer.id}/edit`} state={props.answer.serialize()} ><i className="bi bi-pencil-square" /></Link> 
+        <Button variant="danger" onClick={() => props.deleteAnswer(props.answer.id)}><i className="bi bi-trash" /></Button>
+      </>}
     </td>
   );
 }

@@ -32,7 +32,8 @@ const voteUp = async (answerId) => {
   const response = await fetch(`${SERVER_URL}/api/answers/${answerId}/vote`, {
     method: "POST",
     headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({vote: "up"})
+    body: JSON.stringify({vote: "up"}),
+    credentials: 'include'
   });
 
   // TODO: migliorare gestione errori
@@ -49,7 +50,8 @@ const addAnswer = async (answer, questionId) => {
   const response = await fetch(`${SERVER_URL}/api/questions/${questionId}/answers`, {
     method: "POST",
     headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({text: answer.text, email: answer.email, userId: answer.userId, score: 0, date: answer.date})
+    body: JSON.stringify({text: answer.text, email: answer.email, userId: answer.userId, score: 0, date: answer.date}),
+    credentials: 'include'
   });
 
   // TODO: migliorare gestione errori
@@ -70,7 +72,8 @@ const updateAnswer = async (answer) => {
   const response = await fetch(`${SERVER_URL}/api/answers/${answer.id}`, {
     method: "PUT",
     headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({text: answer.text, email: answer.email, userId: answer.userId, score: answer.score, date: answer.date})
+    body: JSON.stringify({text: answer.text, email: answer.email, userId: answer.userId, score: answer.score, date: answer.date}),
+    credentials: 'include'
   });
 
   // TODO: migliorare gestione errori
@@ -85,5 +88,45 @@ const updateAnswer = async (answer) => {
   else return null;
 }
 
-const API = { getAnswers, getQuestions, voteUp, addAnswer, updateAnswer };
+const logIn = async (credentials) => {
+  const response = await fetch(SERVER_URL + '/api/sessions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+    body: JSON.stringify(credentials),
+  });
+  if(response.ok) {
+    const user = await response.json();
+    return user;
+  }
+  else {
+    const errDetails = await response.text();
+    throw errDetails;
+  }
+};
+
+const getUserInfo = async () => {
+  const response = await fetch(SERVER_URL + '/api/sessions/current', {
+    credentials: 'include',
+  });
+  const user = await response.json();
+  if (response.ok) {
+    return user;
+  } else {
+    throw user;  // an object with the error coming from the server
+  }
+};
+
+const logOut = async() => {
+  const response = await fetch(SERVER_URL + '/api/sessions/current', {
+    method: 'DELETE',
+    credentials: 'include'
+  });
+  if (response.ok)
+    return null;
+}
+
+const API = { getAnswers, getQuestions, voteUp, addAnswer, updateAnswer, logIn, getUserInfo, logOut };
 export default API;
