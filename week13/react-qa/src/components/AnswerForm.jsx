@@ -47,6 +47,10 @@ export function AnswerForm(props) {
     // creo un oggetto {} dal FormData
     const answer = Object.fromEntries(formData.entries());
 
+    // aggiungo i campi necessari alla risposta dall'utente loggato
+    answer.email = props.user.username;
+    answer.userId = props.user.id;
+
     // esempio di validazione
     if(answer.text.trim() === "") {
       answer.error = "The answer can't be empty, please fix it!";
@@ -56,7 +60,8 @@ export function AnswerForm(props) {
     if(props.addAnswer)
       // aggiungo la risposta
       try {
-        await API.addAnswer({...answer, userId: 1}, questionId);
+        console.log(answer);
+        await API.addAnswer({...answer}, questionId);
       }
       catch(serverError) {
         answer.error = serverError;
@@ -64,7 +69,7 @@ export function AnswerForm(props) {
       }
     else
       try {
-        await API.updateAnswer({id: props.answer.id, ...answer, userId: props.answer.userId, score: props.answer.score});
+        await API.updateAnswer({id: props.answer.id, ...answer, score: props.answer.score});
       }
       catch(serverError) {
         answer.error = serverError;

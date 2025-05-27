@@ -75,7 +75,7 @@ function App() {
         <Route path="/questions/:questionId" element={ <QuestionDescription questions={questions} /> } >
           <Route index element={ <Answers user={user} /> } />
           <Route path="answers/new" element={loggedIn ? <AnswerForm addAnswer={true} user={user} /> : <Navigate replace to='/' />} />
-          <Route path="answers/:answerId/edit" element={loggedIn ? <EditAnswerForm editAnswer={true} /> : <Navigate replace to='/' />} /> 
+          <Route path="answers/:answerId/edit" element={loggedIn ? <EditAnswerForm editAnswer={true} user={user} /> : <Navigate replace to='/' />} /> 
         </Route>
         <Route path='/login' element={loggedIn ? <Navigate replace to='/' /> : <LoginForm handleLogin={handleLogin} />} />
         <Route path="*" element={ <NotFound /> } />
